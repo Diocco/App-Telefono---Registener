@@ -41,4 +41,11 @@ export const estilosGeneral = StyleSheet.create({
     height: 110,
     backgroundColor: colores.boton,
   },
+  encabezado__boton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 50,
+    width: 50,
+  },
 });

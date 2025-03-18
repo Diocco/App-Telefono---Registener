@@ -25,7 +25,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 
 // Variables
 import { colores } from "../constants/colores";
-import VentanaProductos from "./ventanaProductos";
+import VentanaProductos from "./ventanaProductos/ventanaProductos";
 import { Link, useRouter } from "expo-router";
 
 const MensajeEmergente = () => {

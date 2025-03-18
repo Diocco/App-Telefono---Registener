@@ -126,7 +126,7 @@ function LayoutContent() {
         </>
       )}
 
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

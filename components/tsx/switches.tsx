@@ -1,25 +1,45 @@
-"use client"
+"use client";
 
-import { Switch } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { colores } from "@/constants/colores";
+import { useState } from "react";
+import { Switch, View, Text, StyleSheet } from "react-native";
 
+export const SwitchGeneral1 = ({
+  titulo,
+  onValueChange,
+  valorInicial,
+}: {
+  titulo: string;
+  onValueChange: Function;
+  valorInicial: boolean;
+}) => {
+  const [checked, setChecked] = useState(valorInicial);
 
-export const SwitchGeneral1 = ({titulo,onClick,valorInicial}:{titulo:string,onClick:Function,valorInicial:boolean}) => {
-    const [checked, setChecked] = useState(valorInicial)
+  return (
+    <View style={styles.container}>
+      <Switch
+        value={checked}
+        onValueChange={() => {
+          setChecked(!checked);
+          onValueChange(!checked);
+        }} // Cambia el estado cuando se toca el switch
+        trackColor={{ false: "#767577", true: colores.boton }} // Color del track en modo apagado o encendido
+        thumbColor="white" // Color del thumb (el círculo)
+      />
+      <Text style={styles.text}>{titulo}</Text>
+    </View>
+  );
+};
 
-
-
-    return (
-        <Switch.Root margin={"15px 10px"} key={'lg'} size={"lg"}
-        checked={checked}
-        onCheckedChange={(e) => setChecked(e.checked)}
-        onClick={()=>onClick(!checked)}
-        >
-        <Switch.HiddenInput />
-            <Switch.Control >
-                <Switch.Thumb />
-            </Switch.Control>
-            <Switch.Label fontSize={"17px"}>{titulo}</Switch.Label>
-        </Switch.Root>
-    )
-}
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  text: {
+    color: colores.letra,
+    fontSize: 18,
+    paddingLeft: 5,
+  },
+});

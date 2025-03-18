@@ -1,8 +1,8 @@
 import { useQuery } from "react-query";
-import { CategoriaI } from "../interfaces/categorias";
-import { ProductoI } from "../interfaces/producto";
-import { solicitudObtenerProductos } from "../services/productosAPI";
-import { useState } from "react";
+import { CategoriaI } from "../../interfaces/categorias";
+import { ProductoI } from "../../interfaces/producto";
+import { solicitudObtenerProductos } from "../../services/productosAPI";
+import { SetStateAction, useState } from "react";
 import {
   Text,
   SectionList,
@@ -12,16 +12,19 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
+  Modal,
+  ScrollView,
+  FlatList,
 } from "react-native";
 
 // Variables globales
-import { definirProductos, filtrarProductos } from "../redux/productosSlice";
-import { definirCategorias } from "../redux/categoriasSlice";
+import { definirProductos, filtrarProductos } from "../../redux/productosSlice";
+import { definirCategorias } from "../../redux/categoriasSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 // import { VentanaVerProducto } from "./ventanaVerProducto";
-import { ordenarProductos } from "./helpers/ordenarProductos";
-import { obtenerSourceImagen } from "./helpers/obtenerSourceImagen";
+import { ordenarProductos } from "../helpers/ordenarProductos";
+import { obtenerSourceImagen } from "../helpers/obtenerSourceImagen";
 
 // Iconos
 import Entypo from "@expo/vector-icons/Entypo";
@@ -30,10 +33,11 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 // Variables globales
-import { colores } from "../constants/colores";
-import { estilosGeneral } from "../constants/estilosGenerales";
-import { Stack } from "expo-router";
-// import { Acordion } from "@/components/tsx/acordion";
+import { colores } from "../../constants/colores";
+import { estilosGeneral } from "../../constants/estilosGenerales";
+import { Link, Stack, useRouter } from "expo-router";
+import { modificarPreferencias } from "../../redux/tokenSlice";
+import { SwitchGeneral1 } from "../../components/tsx/switches";
 
 interface RespuestaProductos {
   productos: ProductoI[];
@@ -60,68 +64,79 @@ const productoNuevo: ProductoI = {
   imagenes: [],
 };
 
-// const VentanaConfiguracionProductos = ({
-//   setEsVerConfiguracion,
-// }: {
-//   setEsVerConfiguracion: React.Dispatch<React.SetStateAction<boolean>>;
-// }) => {
-//   const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario); // Obtiene los productos de la variable global
-//   const dispatch = useDispatch<AppDispatch>();
+const VentanaConfiguracionProductos = ({
+  setEsVerConfiguracion,
+}: {
+  setEsVerConfiguracion: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario); // Obtiene los productos de la variable global
+  const dispatch = useDispatch<AppDispatch>();
 
-//   const alternarEsAgruparCategoria = (estado: boolean) => {
-//     if (!estado) dispatch(filtrarProductos({ categoriasBuscadas: [] }));
-//     dispatch(modificarPreferencias({ esAgruparCategoria: estado }));
-//   }; // Cada vez que el switch cambia se ejecuta el cambio en el estado global
+  const alternarEsAgruparCategoria = (estado: boolean) => {
+    if (!estado) dispatch(filtrarProductos({ categoriasBuscadas: [] }));
+    dispatch(modificarPreferencias({ esAgruparCategoria: estado }));
+  }; // Cada vez que el switch cambia se ejecuta el cambio en el estado global
 
-//   return (
-//     <View id="ventanaProductos__ventanaConfiguracion">
-//       <View id="ventanaProductos__ventanaConfiguracion-View">
-//         <SwitchGeneral1
-//           titulo="Agrupar por categorias"
-//           onPress={alternarEsAgruparCategoria}
-//           valorInicial={usuario!.preferencias.esAgruparCategoria}
-//         />
-//         <SwitchGeneral1
-//           titulo="Agrupar por producto"
-//           onPress={() => {}}
-//           valorInicial={false}
-//         />
-//         <BotonGeneral1
-//           id="ventanaProductos__ventanaConfiguracion-Pressable"
-//           onPress={() => setEsVerConfiguracion(false)}
-//           titulo="Aceptar"
-//         />
-//       </View>
-//     </View>
-//   );
-// };
+  return (
+    <View id="ventanaProductos__ventanaConfiguracion">
+      <View id="ventanaProductos__ventanaConfiguracion-View">
+        <SwitchGeneral1
+          titulo="Agrupar por categorias"
+          onValueChange={alternarEsAgruparCategoria}
+          valorInicial={usuario!.preferencias.esAgruparCategoria}
+        />
+        <SwitchGeneral1
+          titulo="Agrupar por producto"
+          onValueChange={() => {}}
+          valorInicial={false}
+        />
+        <Pressable
+          style={estilosGeneral.botonGeneral1}
+          onPress={() => setEsVerConfiguracion(false)}
+        >
+          <Text style={estilosGeneral.letraBoton1}>Aceptar</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
 
-// const FiltrosCategorias = ({
-//   categoria,
-//   categoriasBuscadas,
-//   alternarCategoriaBuscada,
-// }: {
-//   categoria: CategoriaI;
-//   categoriasBuscadas: string[];
-//   alternarCategoriaBuscada: Function;
-// }) => {
-//   let clase: string = "ventanaProductos__filtroCategoria__categoria"; // Clase por defecto
+const FiltrosCategorias = ({
+  categoria,
+  categoriasBuscadas,
+  alternarCategoriaBuscada,
+}: {
+  categoria: CategoriaI;
+  categoriasBuscadas: string[];
+  alternarCategoriaBuscada: Function;
+}) => {
+  let esActivo: boolean = false;
 
-//   if (categoriasBuscadas.length > 0) {
-//     // Verifica si existen clases buscadas en este momento
-//     if (categoriasBuscadas.includes(categoria.nombre))
-//       clase += " ventanaProductos__filtroCategoria__categoria-active"; // Verifica que la clase en el filtro este siendo buscada, de ser asi la marca visualmente como activa
-//   }
+  // Verifica si existen clases buscadas en este momento
+  if (categoriasBuscadas.length > 0)
+    if (categoriasBuscadas.includes(categoria.nombre)) {
+      // Verifica si la clase actual forma parte de las clases buscadas
+      esActivo = true;
+    }
 
-//   return (
-//     <span
-//       className={clase}
-//       onPress={() => alternarCategoriaBuscada(categoria.nombre)}
-//     >
-//       {categoria.nombre}
-//     </span>
-//   );
-// };
+  return (
+    <Pressable
+      style={
+        esActivo
+          ? [
+              estilos.ventanaProductos__filtroCategoriaCategoriaActive,
+              estilos.ventanaProductos__filtroCategoriaCategoria,
+            ]
+          : estilos.ventanaProductos__filtroCategoriaCategoria
+      }
+      onPress={() => alternarCategoriaBuscada(categoria.nombre)}
+    >
+      <Text style={estilos.ventanaProductos__filtroCategoriaText}>
+        {categoria.nombre}
+      </Text>
+    </Pressable>
+  );
+};
 
 export default function VentanaProductos() {
   const tokenAcceso = useSelector(
@@ -144,9 +159,6 @@ export default function VentanaProductos() {
     (state: RootState) => state.categorias.categorias,
   );
 
-  const [esVerProducto, setEsVerProducto] = useState<ProductoI | undefined>(
-    undefined,
-  );
   const [esVerConfiguracion, setEsVerConfiguracion] = useState<boolean>(false);
 
   const productosOrdenados = ordenarProductos(productos);
@@ -176,16 +188,6 @@ export default function VentanaProductos() {
     },
   );
 
-  const [esTransicion, setEsTransicion] = useState<boolean>(false); // Indica a la ventana que tiene que hacer la animacion de desaparecer
-
-  const volverVentanaProductos = () => {
-    setEsTransicion(true); // Indica a cualquier ventana activa que tiene que comenzar a hacer la animacion de desaparecer
-    setTimeout(() => {
-      setEsVerProducto(undefined); // Desactiva todas las ventanas activas
-      setEsTransicion(false); // Finaliza la animacion de desaparecer
-    }, 180);
-  };
-
   const alternarCategoriaBuscada = (categoria: string) => {
     const categoriasBuscadasActual = [...categoriasBuscadas]; // Copia el array de categorias filtradas
     const index = categoriasBuscadasActual.findIndex(
@@ -208,14 +210,14 @@ export default function VentanaProductos() {
   };
 
   const Producto = ({ producto }: { producto: ProductoI }) => {
+    const router = useRouter();
+
     return (
       <>
         <Pressable
-          onPress={() => {
-            setEsVerProducto(producto);
-          }}
           style={estilos.ventanaProductos__producto}
           key={producto._id}
+          onPress={() => router.push("/ventanaProductos/verProducto")}
         >
           <Image
             src={obtenerSourceImagen(producto.imagenes[0])}
@@ -317,15 +319,9 @@ export default function VentanaProductos() {
     <>
       <Stack.Screen
         options={{
-          headerShown: true,
           headerLeft: () => {
             return (
-              <Pressable
-                onPress={() => {
-                  setEsVerProducto(productoNuevo);
-                }}
-                style={estilos.ventanaProductos__agregarProducto}
-              >
+              <Pressable style={estilosGeneral.encabezado__boton}>
                 <AntDesign name="plus" size={24} color="white" />
               </Pressable>
             );
@@ -338,10 +334,7 @@ export default function VentanaProductos() {
                   estilosGeneral.inputGeneral,
                   {
                     width: 250,
-                    backgroundColor: "transparent",
                     color: "white",
-                    borderBottomWidth: 1,
-                    borderColor: colores.letraSecundario,
                     marginTop: 0,
                   },
                 ]}
@@ -354,7 +347,7 @@ export default function VentanaProductos() {
           headerRight: () => {
             return (
               <Pressable
-                style={estilos.ventanaProductos__botonVolver}
+                style={estilosGeneral.encabezado__boton}
                 onPress={() => {
                   setEsVerConfiguracion(true);
                 }}
@@ -369,7 +362,10 @@ export default function VentanaProductos() {
         <View style={estilos.ventanaProductos__tablaProductos}>
           {esAgruparCategoria ? (
             <>
-              {/* <View id="ventanaProductos__filtroCategoria">
+              <ScrollView
+                horizontal={true}
+                style={estilos.ventanaProductos__filtroCategoria}
+              >
                 {categorias.map((categoria) => (
                   <FiltrosCategorias
                     key={categoria._id.toString() + "filtroCategoria"}
@@ -378,13 +374,14 @@ export default function VentanaProductos() {
                     categoriasBuscadas={categoriasBuscadas}
                   />
                 ))}
-              </View>
-              {productos.map((producto) => (
-                <Producto
-                  key={producto._id.toString() + new Date().getTime.toString()}
-                  producto={producto}
-                />
-              ))} */}
+              </ScrollView>
+              <FlatList
+                data={productos}
+                keyExtractor={(producto) =>
+                  producto._id.toString() + new Date().getTime.toString()
+                }
+                renderItem={(producto) => <Producto producto={producto.item} />}
+              />
             </>
           ) : (
             <Acordeon productosOrdenados={productosOrdenados} />
@@ -395,19 +392,20 @@ export default function VentanaProductos() {
         </View>
       </View>
 
-      {/* {esVerConfiguracion && (
-        // <VentanaConfiguracionProductos
-        //   setEsVerConfiguracion={setEsVerConfiguracion}
-        // />
-      )} */}
-      {/* {esVerProducto && (
-        // <VentanaVerProducto
-        //   setEsVerProducto={setEsVerProducto}
-        //   esVerProducto={esVerProducto}
-        //   volverVentanaProductos={volverVentanaProductos}
-        //   esDesaparecer={esTransicion}
-        // />
-      )} */}
+      <Modal
+        visible={esVerConfiguracion}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setEsVerConfiguracion(false)}
+      >
+        <View style={estilos.ventanaProductos__ventanaConfiguracion}>
+          <View style={estilos.ventanaProductos__ventanaConfiguracionDiv}>
+            <VentanaConfiguracionProductos
+              setEsVerConfiguracion={setEsVerConfiguracion}
+            />
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -421,12 +419,6 @@ const estilos = StyleSheet.create({
   ventanaProductos__inputBusqueda: {
     width: "60%",
     height: 20,
-  },
-  ventanaProductos__botonVolver: {
-    display: "flex",
-    alignContent: "center",
-    justifyContent: "center",
-    marginRight: 20,
   },
   ventanaProductos__tablaProductos: {
     flex: 1,
@@ -511,22 +503,21 @@ const estilos = StyleSheet.create({
   },
 
   ventanaProductos__ventanaConfiguracion: {
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    position: "absolute",
-    backgroundColor: "var(--fondoOscurecido)", // Necesita conversión
-    top: 0,
-    left: 0,
+    backgroundColor: colores.fondoOscurecido, // Necesita conversión
     flex: 1,
     zIndex: 220,
   },
 
   ventanaProductos__ventanaConfiguracionDiv: {
-    display: "flex",
+    justifyContent: "center",
+    alignContent: "center",
     flexDirection: "column",
+    width: "auto",
+    height: "auto",
     borderRadius: 10,
-    padding: 5,
+    padding: 20,
     backgroundColor: colores.fondo,
     zIndex: 230,
   },
@@ -540,7 +531,7 @@ const estilos = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     flexWrap: "nowrap",
-    minHeight: "auto",
+    maxHeight: 60,
   },
 
   ventanaProductos__filtroCategoriaCategoria: {
@@ -548,10 +539,16 @@ const estilos = StyleSheet.create({
     padding: 10,
     margin: 5,
     borderRadius: 15,
+    width: "auto",
+    height: 50,
   },
 
   ventanaProductos__filtroCategoriaCategoriaActive: {
     borderWidth: 2,
     borderColor: "white",
+  },
+  ventanaProductos__filtroCategoriaText: {
+    color: colores.letra,
+    fontSize: 20,
   },
 });
