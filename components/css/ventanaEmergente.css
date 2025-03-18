@@ -1,0 +1,39 @@
+#ventanaEmergente__fondo{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position:fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--fondoOscurecido);
+    z-index: 6000;
+}
+#ventanaEmergente{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    padding: 20px;
+    width: max-content;
+    max-width: 90vw;
+    height: min-content;
+    z-index: 10000000000000;
+    border-radius: 30px;
+    background: var(--fondo);
+    animation: ventanaSurgir 0.1s linear;
+}
+
+#ventanaEmergente__h3{
+    font-size: 30px;
+    margin: 20px 0;
+    text-align: center;
+
+}
+
+#ventanaEmergente__botones{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
