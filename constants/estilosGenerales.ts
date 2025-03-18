@@ -38,11 +38,7 @@ export const estilosGeneral = StyleSheet.create({
     color: colores.boton,
   },
   encabezado: {
-    flexDirection: "row",
-    width: "auto",
-    height: 80,
+    height: 110,
     backgroundColor: colores.boton,
-    borderStartEndRadius: 20,
-    borderEndEndRadius: 20,
   },
 });

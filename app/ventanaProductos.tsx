@@ -32,6 +32,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // Variables globales
 import { colores } from "../constants/colores";
 import { estilosGeneral } from "../constants/estilosGenerales";
+import { Stack } from "expo-router";
+// import { Acordion } from "@/components/tsx/acordion";
 
 interface RespuestaProductos {
   productos: ProductoI[];
@@ -121,13 +123,7 @@ const productoNuevo: ProductoI = {
 //   );
 // };
 
-export default function VentanaProductos({
-  volverVentanaInicial,
-  esDesaparecer,
-}: {
-  volverVentanaInicial: Function;
-  esDesaparecer: boolean;
-}) {
+export default function VentanaProductos() {
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
   ); // Obtiene el token de acceso de la variable global
@@ -277,10 +273,34 @@ export default function VentanaProductos({
             )
           }
           renderSectionHeader={({ section }) => (
-            <Pressable onPress={() => setCategoriaSeleccionada(section.title)}>
-              <Text style={{ fontSize: 20, color: colores.letra }}>
+            <Pressable
+              onPress={() => {
+                if (categoriaSeleccionada === section.title)
+                  setCategoriaSeleccionada("");
+                else setCategoriaSeleccionada(section.title);
+              }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 25,
+                  color: colores.letra,
+                  paddingVertical: 15,
+                  paddingLeft: 9,
+                  marginVertical: 2,
+                }}
+              >
                 {section.title}
               </Text>
+              {categoriaSeleccionada === section.title ? (
+                <Entypo name="chevron-left" size={30} color="white" />
+              ) : (
+                <Entypo name="chevron-down" size={30} color="white" />
+              )}
             </Pressable>
           )}
         />
@@ -295,33 +315,57 @@ export default function VentanaProductos({
 
   return (
     <>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerLeft: () => {
+            return (
+              <Pressable
+                onPress={() => {
+                  setEsVerProducto(productoNuevo);
+                }}
+                style={estilos.ventanaProductos__agregarProducto}
+              >
+                <AntDesign name="plus" size={24} color="white" />
+              </Pressable>
+            );
+          },
+          headerTitleAlign: "center",
+          headerTitle: () => {
+            return (
+              <TextInput
+                style={[
+                  estilosGeneral.inputGeneral,
+                  {
+                    width: 250,
+                    backgroundColor: "transparent",
+                    color: "white",
+                    borderBottomWidth: 1,
+                    borderColor: colores.letraSecundario,
+                    marginTop: 0,
+                  },
+                ]}
+                onChangeText={modificarPalabraBuscada}
+                placeholder="Buscar"
+                placeholderTextColor={colores.letraSecundario}
+              ></TextInput>
+            );
+          },
+          headerRight: () => {
+            return (
+              <Pressable
+                style={estilos.ventanaProductos__botonVolver}
+                onPress={() => {
+                  setEsVerConfiguracion(true);
+                }}
+              >
+                <FontAwesome name="gear" size={24} color="white" />
+              </Pressable>
+            );
+          },
+        }}
+      />
       <View style={estilos.ventanaProductos}>
-        <View style={estilosGeneral.encabezado}>
-          <Pressable
-            style={[
-              estilos.ventanaProductos__botonVolver,
-              estilosGeneral.botonGeneral1,
-            ]}
-            onPress={() => volverVentanaInicial()}
-          >
-            <AntDesign name="back" size={24} color="black" />
-          </Pressable>
-          <TextInput
-            onChangeText={modificarPalabraBuscada}
-            placeholder="Buscar"
-          />
-          <Pressable
-            style={[
-              estilos.ventanaProductos__botonVolver,
-              estilosGeneral.botonGeneral1,
-            ]}
-            onPress={() => {
-              setEsVerConfiguracion(true);
-            }}
-          >
-            <FontAwesome name="gear" size={24} color="black" />
-          </Pressable>
-        </View>
         <View style={estilos.ventanaProductos__tablaProductos}>
           {esAgruparCategoria ? (
             <>
@@ -349,17 +393,6 @@ export default function VentanaProductos({
           {isLoading && <ActivityIndicator />}
           {isError && <MaterialIcons name="error" size={24} color="black" />}
         </View>
-        <Pressable
-          onPress={() => {
-            setEsVerProducto(productoNuevo);
-          }}
-          style={[
-            estilos.ventanaProductos__agregarProducto,
-            estilosGeneral.botonGeneral1,
-          ]}
-        >
-          <AntDesign name="plus" size={24} color="black" />
-        </Pressable>
       </View>
 
       {/* {esVerConfiguracion && (
@@ -393,6 +426,7 @@ const estilos = StyleSheet.create({
     display: "flex",
     alignContent: "center",
     justifyContent: "center",
+    marginRight: 20,
   },
   ventanaProductos__tablaProductos: {
     flex: 1,
