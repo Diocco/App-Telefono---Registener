@@ -9,7 +9,7 @@ export default function VentanaVerProductoLayout() {
         options={{ headerStyle: { backgroundColor: colores.boton } }}
       />
       <Stack.Screen
-        name="verProducto"
+        name="[productoId]"
         options={{ headerStyle: { backgroundColor: colores.boton } }}
       />
     </Stack>

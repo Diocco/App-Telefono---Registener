@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { CategoriaI } from "../../interfaces/categorias";
 import { ProductoI } from "../../interfaces/producto";
 import { solicitudObtenerProductos } from "../../services/productosAPI";
-import { SetStateAction, useState } from "react";
+import { useState } from "react";
 import {
   Text,
   SectionList,
@@ -35,7 +35,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // Variables globales
 import { colores } from "../../constants/colores";
 import { estilosGeneral } from "../../constants/estilosGenerales";
-import { Link, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { modificarPreferencias } from "../../redux/tokenSlice";
 import { SwitchGeneral1 } from "../../components/tsx/switches";
 
@@ -44,25 +44,6 @@ interface RespuestaProductos {
   categoriasCompletas: CategoriaI[];
   paginasCantidad: number;
 }
-
-const productoNuevo: ProductoI = {
-  _id: "",
-  nombre: "",
-  marca: "",
-  modelo: "",
-  estado: false,
-  usuario: "",
-  categoria: "",
-  categoriaNombre: "",
-  variantes: [],
-  descripcion: "",
-  precio: 0,
-  precioViejo: 0,
-  especificaciones: [],
-  disponible: false,
-  tags: [],
-  imagenes: [],
-};
 
 const VentanaConfiguracionProductos = ({
   setEsVerConfiguracion,
@@ -217,7 +198,9 @@ export default function VentanaProductos() {
         <Pressable
           style={estilos.ventanaProductos__producto}
           key={producto._id}
-          onPress={() => router.push("/ventanaProductos/verProducto")}
+          onPress={() =>
+            router.push(`/ventanaProductos/${producto._id.toString()}`)
+          }
         >
           <Image
             src={obtenerSourceImagen(producto.imagenes[0])}
@@ -398,13 +381,16 @@ export default function VentanaProductos() {
         transparent={true}
         onRequestClose={() => setEsVerConfiguracion(false)}
       >
-        <View style={estilos.ventanaProductos__ventanaConfiguracion}>
+        <Pressable
+          style={estilosGeneral.fondoModal}
+          onPress={() => setEsVerConfiguracion(false)}
+        >
           <View style={estilos.ventanaProductos__ventanaConfiguracionDiv}>
             <VentanaConfiguracionProductos
               setEsVerConfiguracion={setEsVerConfiguracion}
             />
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </>
   );

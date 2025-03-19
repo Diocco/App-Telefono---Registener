@@ -25,7 +25,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 
 // Variables
 import { colores } from "../constants/colores";
-import IniciarSesion from "./iniciarSesion";
+import { IniciarSesion } from "./iniciarSesion";
 import { useSelector } from "react-redux";
 import { estilosGeneral } from "@/constants/estilosGenerales";
 

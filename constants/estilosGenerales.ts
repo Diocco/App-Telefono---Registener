@@ -5,7 +5,7 @@ export const estilosGeneral = StyleSheet.create({
   inputGeneral: {
     fontSize: 20,
     padding: 10,
-    backgroundColor: "#383838",
+    backgroundColor: colores.fondoElemento,
     borderRadius: 10,
     borderWidth: 0,
     marginTop: 15,
@@ -47,5 +47,11 @@ export const estilosGeneral = StyleSheet.create({
     justifyContent: "center",
     height: 50,
     width: 50,
+  },
+  fondoModal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colores.fondoOscurecido,
   },
 });

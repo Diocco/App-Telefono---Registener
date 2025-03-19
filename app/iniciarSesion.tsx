@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colores } from "../constants/colores";
 import { estilosGeneral } from "../constants/estilosGenerales";
 
-export default function IniciarSesion() {
+export function IniciarSesion() {
   const [esRegistro, setRegistro] = useState(false);
   const reduxDispatch = useDispatch();
 
@@ -217,7 +217,7 @@ export default function IniciarSesion() {
           style={estilosGeneral.botonGeneral1}
         >
           {mutationInicioSesion.isLoading || mutationRegistro.isLoading ? (
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color="white" />
           ) : esRegistro ? (
             <Text style={estilosGeneral.letraBoton1}>Registrarse</Text>
           ) : (
