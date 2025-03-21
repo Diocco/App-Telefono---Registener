@@ -12,7 +12,7 @@ interface ProductosState {
 }
 const initialState: ProductosState = {
   // Crea las condiciones iniciales
-  tokenAcceso: "" /*SecureStore.getItem('tokenAcceso')*/,
+  tokenAcceso: SecureStore.getItem("tokenAcceso"),
   usuario: undefined,
 };
 
@@ -46,7 +46,7 @@ const tokenSlice = createSlice({
 });
 
 export const eliminarTokenAcceso = () => (dispatch: AppDispatch) => {
-  // SecureStore.deleteItemAsync('tokenAcceso')
+  SecureStore.deleteItemAsync("tokenAcceso");
   dispatch(reiniciarProductos());
   dispatch(reiniciarTokenAcceso());
   dispatch(reiniciarCategorias());
