@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
-import { Provider as ProviderRedux } from "react-redux";
-import store from "../redux/store"; // Se importa la store con todas las variables globales para envolver la aplicacion con un provider que tiene la store
+import { Provider as ProviderRedux, useDispatch } from "react-redux";
+import store, { AppDispatch } from "../redux/store"; // Se importa la store con todas las variables globales para envolver la aplicacion con un provider que tiene la store
 import { QueryClient, QueryClientProvider } from "react-query";
 
 import { RootState } from "../redux/store"; // Se importa la store con todas las variables globales para envolver la aplicacion con un provider que tiene la store
@@ -28,6 +28,11 @@ import { colores } from "../constants/colores";
 import { IniciarSesion } from "./iniciarSesion";
 import { useSelector } from "react-redux";
 import { estilosGeneral } from "@/constants/estilosGenerales";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { solicitudUsuarioVerificado } from "@/services/usuariosAPI";
+import { definirUsuario, eliminarTokenAcceso } from "@/redux/tokenSlice";
+import { mostrarMensaje } from "@/redux/mensajeEmergenteSlice";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -47,21 +52,30 @@ export default function RootLayout() {
 
 function LayoutContent() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
   );
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  if (!loaded) {
-    return null;
-  }
+  useEffect(() => {
+    if (!tokenAcceso) {
+      // Si no existe el token entonces manda al usuario al inicio de sesion
+      return;
+    }
+    // Si existe un token entonces lo verifica
+    solicitudUsuarioVerificado(tokenAcceso) // Verifica el usuario en la base de datos
+      .then((data) => {
+        dispatch(definirUsuario(data.usuarioVerificado)); // Define el usuario en la variable global
+      })
+      .catch(() => {
+        dispatch(eliminarTokenAcceso());
+        dispatch(
+          mostrarMensaje({ mensaje: "Sesion ha caducado", esError: true }),
+        ); // Si el token no es valido reedirije al usuario al inicio de sesion
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokenAcceso]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -113,8 +127,46 @@ function LayoutContent() {
                 title: "",
                 tabBarIcon: ({ focused }) => {
                   return (
+                    <AntDesign
+                      name="bars"
+                      size={40}
+                      color={focused ? colores.boton : colores.letraSecundario}
+                    />
+                  );
+                },
+              }}
+            />
+            <Tabs.Screen
+              name="estadisticas"
+              options={{
+                tabBarIconStyle: {
+                  height: 50,
+                  width: 50,
+                },
+                title: "",
+                tabBarIcon: ({ focused }) => {
+                  return (
                     <Ionicons
                       name="stats-chart"
+                      size={40}
+                      color={focused ? colores.boton : colores.letraSecundario}
+                    />
+                  );
+                },
+              }}
+            />
+            <Tabs.Screen
+              name="configuracion"
+              options={{
+                tabBarIconStyle: {
+                  height: 50,
+                  width: 50,
+                },
+                title: "",
+                tabBarIcon: ({ focused }) => {
+                  return (
+                    <FontAwesome
+                      name="gear"
                       size={40}
                       color={focused ? colores.boton : colores.letraSecundario}
                     />

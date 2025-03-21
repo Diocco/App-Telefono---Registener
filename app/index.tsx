@@ -12,14 +12,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 // Variables
 import { colores } from "../constants/colores";
-
-const nombreIniciales = (nombre: string | undefined) => {
-  if (!nombre) return "";
-  const iniciales = nombre?.split(" ");
-  if (iniciales.length > 1)
-    return `${iniciales[0][0].toUpperCase()}${iniciales[1][0].toUpperCase()}`;
-  else return `${nombre[0].toUpperCase()}${nombre[1].toUpperCase()}`;
-};
+import { nombreIniciales } from "./helpers/letrasIniciales";
 
 function VentanaInicial() {
   const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario);
@@ -139,32 +132,9 @@ const MensajeEmergente = () => {
 };
 
 export default function App() {
-  const tokenAcceso = useSelector(
-    (state: RootState) => state.tokenAcceso.tokenAcceso,
-  );
   const esMensajeEmergente = useSelector(
     (state: RootState) => state.mensajeEmergente.esActivo,
   );
-  const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    if (!tokenAcceso) {
-      // Si no existe el token entonces manda al usuario al inicio de sesion
-      return;
-    }
-    // Si existe un token entonces lo verifica
-    solicitudUsuarioVerificado(tokenAcceso) // Verifica el usuario en la base de datos
-      .then((data) => {
-        dispatch(definirUsuario(data.usuarioVerificado)); // Define el usuario en la variable global
-      })
-      .catch(() => {
-        dispatch(eliminarTokenAcceso());
-        dispatch(
-          mostrarMensaje({ mensaje: "Sesion ha caducado", esError: true }),
-        ); // Si el token no es valido reedirije al usuario al inicio de sesion
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokenAcceso]);
 
   return (
     <>

@@ -45,8 +45,8 @@ const tokenSlice = createSlice({
   },
 });
 
-export const eliminarTokenAcceso = () => (dispatch: AppDispatch) => {
-  SecureStore.deleteItemAsync("tokenAcceso");
+export const eliminarTokenAcceso = () => async (dispatch: AppDispatch) => {
+  await SecureStore.deleteItemAsync("tokenAcceso");
   dispatch(reiniciarProductos());
   dispatch(reiniciarTokenAcceso());
   dispatch(reiniciarCategorias());
