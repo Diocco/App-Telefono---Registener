@@ -3,7 +3,7 @@ import { usuario } from "../interfaces/usuario";
 import { AppDispatch } from "./store";
 import { reiniciarProductos } from "./productosSlice";
 import { reiniciarCategorias } from "./categoriasSlice";
-// import * as SecureStore from 'expo-secure-store'
+import * as SecureStore from "expo-secure-store";
 
 interface ProductosState {
   // Crea la interface de lo que contiene la variable global
@@ -25,8 +25,7 @@ const tokenSlice = createSlice({
       state,
       action: PayloadAction<{ token: string; usuario: usuario }>,
     ) => {
-      //PayloadAction<[Tipo de dato esperado]>
-      // SecureStore.setItem('tokenAcceso',action.payload.token)
+      SecureStore.setItem("tokenAcceso", action.payload.token);
       state.tokenAcceso = action.payload.token;
       state.usuario = action.payload.usuario;
     },

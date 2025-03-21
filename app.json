@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "entryPoint": "expo-router/entry",
     "ios": {
       "supportsTablet": true
@@ -25,7 +25,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-
+      "expo-secure-store",
       "expo-router",
       [
         "expo-splash-screen",
@@ -35,8 +35,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-secure-store"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -48,6 +47,7 @@
       "eas": {
         "projectId": "7f0ef714-638e-43dd-a21e-c06e8fa7564d"
       }
-    }
+    },
+    "owner": "dermai"
   }
 }

@@ -96,7 +96,7 @@ export function IniciarSesion() {
     <SafeAreaView style={estilos.fondo}>
       <View style={estilos.registro}>
         <Text style={estilos.titulo}>
-          {esRegistro ? "Registrarse" : "Iniciar Sesión"}
+          {esRegistro ? "Registrarse" : "Iniciar sesion"}
         </Text>
         {esRegistro && (
           <>
