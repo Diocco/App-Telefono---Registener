@@ -33,6 +33,8 @@ import Entypo from "@expo/vector-icons/Entypo";
 import SelectorRegistro from "../../components/tsx/selectorRegistro";
 import { obtenerSourceImagen } from "../helpers/obtenerSourceImagen";
 import { VentanaEmergente } from "../../components/tsx/ventanaEmergente";
+import { seleccionarImagen } from "../helpers/seleccionarImagen";
+import { produce } from "immer";
 
 const VentanaImagen = ({
   verImagen,
@@ -400,6 +402,17 @@ export default function VentanaVerProducto() {
     router.back();
   };
 
+  const agregarImagen = async () => {
+    const imagen64 = await seleccionarImagen();
+    if (!imagen64) return;
+    setProductoSeleccionado(
+      produce(productoSeleccionado, (borrador) => {
+        borrador.imagenes.push(imagen64); // Actualiza el estado
+      }),
+    );
+    // TODO Chequear que no se suba la misma imagen ya que sino el componente va a tener la misma key
+  };
+
   // Variables que ayudan a agregar elementos dentro del producto
   const especificacionNueva: EspecificacionI = {
     nombre: "",
@@ -417,8 +430,8 @@ export default function VentanaVerProducto() {
   };
 
   if (esEliminarProducto) {
-    // Si el usuario presiona que si entonces elimina el producto
     setEliminarProducto(false);
+    // Si el usuario presiona que si entonces elimina el producto
     const productoID = productoSeleccionado._id;
     if (!tokenAcceso) {
       dispatch(mostrarMensaje({ mensaje: "Sesion Caducada", esError: true })); // TODO: Vuelve al inicio de sesion
@@ -437,6 +450,7 @@ export default function VentanaVerProducto() {
           );
           return;
         }
+        router.back();
       });
   }
 
@@ -545,26 +559,24 @@ export default function VentanaVerProducto() {
           />
           <Text style={estilos.ventanaVerProductos__titulo}>Imagenes</Text>
           <View style={estilos.ventanaVerProducto__imagenes_div}>
-            <View>
-              {productoSeleccionado?.imagenes.map((imagen, index) => (
-                <Pressable
-                  onPress={() => setVerImagen(index + 1)}
-                  style={[
-                    estilosGeneral.inputGeneral,
-                    estilos.ventanaVerProducto__botonImagen,
-                  ]}
-                  key={imagen.slice(10, 30)}
-                >
-                  <Text style={{ color: colores.letra }}>{index + 1}</Text>
-                </Pressable>
-              ))}
-            </View>
+            {productoSeleccionado?.imagenes.map((imagen, index) => (
+              <Pressable
+                onPress={() => setVerImagen(index + 1)}
+                style={[
+                  estilosGeneral.inputGeneral,
+                  estilos.ventanaVerProducto__botonImagen,
+                ]}
+                key={imagen.slice(10, 30)}
+              >
+                <Text style={{ color: colores.letra }}>{index + 1}</Text>
+              </Pressable>
+            ))}
             <Pressable
               style={[
                 estilosGeneral.inputGeneral,
                 estilos.ventanaVerProducto__agregarImagen,
               ]}
-              onPress={() => setVerImagen(-1)}
+              onPress={() => agregarImagen()}
             >
               <AntDesign name="plus" size={24} color="white" />
             </Pressable>
@@ -606,7 +618,6 @@ export default function VentanaVerProducto() {
             ),
           )}
           <Pressable
-            data-testid="boton-agregarEspecificacion"
             style={[
               estilosGeneral.inputGeneral,
               estilos.ventanaVerProducto__agregarEspecificacion,
@@ -729,19 +740,21 @@ const estilos = StyleSheet.create({
 
   ventanaVerProducto__imagenes_div: {
     flexDirection: "row",
+    alignItems: "center",
   },
 
   ventanaVerProducto__botonImagen: {
     alignSelf: "flex-start",
     padding: 20,
-    marginVertical: 10,
+    margin: 5,
   },
 
   ventanaVerProducto__agregarImagen: {
-    alignSelf: "flex-start",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    margin: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 45,
+    width: 45,
+    margin: 5,
   },
 
   ventanaVerProducto__agregarVariante: {

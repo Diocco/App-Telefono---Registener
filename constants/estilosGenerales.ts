@@ -5,7 +5,7 @@ export const estilosGeneral = StyleSheet.create({
   inputGeneral: {
     fontSize: 20,
     padding: 10,
-    backgroundColor: colores.fondoElemento,
+    backgroundColor: colores.input,
     borderRadius: 10,
     borderWidth: 0,
     marginTop: 15,

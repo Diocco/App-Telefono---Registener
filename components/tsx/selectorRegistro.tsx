@@ -37,7 +37,6 @@ export default function SelectorRegistro({
   const [open, setOpen] = useState(false);
   //   const [value, setValue] = useState(null);
   const [items, setItems] = useState(opciones);
-
   return (
     <>
       {titulo && (
@@ -67,6 +66,7 @@ export default function SelectorRegistro({
             items={items}
             setOpen={setOpen}
             setValue={onChange}
+            onChangeValue={onChange}
             placeholder="Selecciona una opción"
             dropDownContainerStyle={{
               backgroundColor: colores.fondoElemento,
