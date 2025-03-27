@@ -3,7 +3,7 @@ import { ElementoCarritoI } from "./elementoCarrito.js";
 
 
 export interface RegistroVentaI{
-    _id?:string,
+    _id:string,
     lugarVenta?:string
     fechaVenta:Date
     total:number

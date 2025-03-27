@@ -3,6 +3,7 @@ import productosReducer from "./productosSlice"; // Se importa la configuracion 
 import categoriasReducer from "./categoriasSlice"; // Se importa la configuracion de la variable productos
 import tokenAccesoReducer from "./tokenSlice"; // Se importa la configuracion de la variable productos
 import mensajeEmergenteReducer from "./mensajeEmergenteSlice";
+import registrosVentaReducer from "./registroVentasSlice";
 
 const store = configureStore({
   // Se configura todas las variables globales
@@ -11,6 +12,7 @@ const store = configureStore({
     tokenAcceso: tokenAccesoReducer,
     categorias: categoriasReducer,
     mensajeEmergente: mensajeEmergenteReducer,
+    registroVentas: registrosVentaReducer,
   },
 });
 

@@ -76,7 +76,7 @@ export default function SelectorRegistro({
           />
         )}
       />
-      {error && <Text>{error}</Text>}
+      {error && <Text style={{ color: "red" }}>{error}</Text>}
     </>
   );
 }

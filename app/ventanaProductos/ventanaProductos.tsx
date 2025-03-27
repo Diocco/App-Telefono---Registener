@@ -38,6 +38,7 @@ import { estilosGeneral } from "../../constants/estilosGenerales";
 import { Stack, useRouter } from "expo-router";
 import { modificarPreferencias } from "../../redux/tokenSlice";
 import { SwitchGeneral1 } from "../../components/tsx/switches";
+import { ErrorCarga } from "@/components/tsx/errorCarga";
 
 interface RespuestaProductos {
   productos: ProductoI[];
@@ -139,6 +140,7 @@ export default function VentanaProductos() {
   const categorias = useSelector(
     (state: RootState) => state.categorias.categorias,
   );
+  const router = useRouter();
 
   const [esVerConfiguracion, setEsVerConfiguracion] = useState<boolean>(false);
 
@@ -191,8 +193,6 @@ export default function VentanaProductos() {
   };
 
   const Producto = ({ producto }: { producto: ProductoI }) => {
-    const router = useRouter();
-
     return (
       <>
         <Pressable
@@ -304,7 +304,10 @@ export default function VentanaProductos() {
         options={{
           headerLeft: () => {
             return (
-              <Pressable style={estilosGeneral.encabezado__boton}>
+              <Pressable
+                style={estilosGeneral.encabezado__boton}
+                onPress={() => router.push(`/ventanaProductos/-1`)}
+              >
                 <AntDesign name="plus" size={24} color="white" />
               </Pressable>
             );
@@ -342,6 +345,16 @@ export default function VentanaProductos() {
         }}
       />
       <View style={estilos.ventanaProductos}>
+        {isLoading && (
+          <ActivityIndicator
+            size={"large"}
+            color={"white"}
+            style={{ flex: 1 }}
+          />
+        )}
+        {isError && (
+          <ErrorCarga mensaje="Error al cargar los productos, porfavor reinicie" />
+        )}
         <View style={estilos.ventanaProductos__tablaProductos}>
           {esAgruparCategoria ? (
             <>
@@ -369,9 +382,6 @@ export default function VentanaProductos() {
           ) : (
             <Acordeon productosOrdenados={productosOrdenados} />
           )}
-
-          {isLoading && <ActivityIndicator />}
-          {isError && <MaterialIcons name="error" size={24} color="black" />}
         </View>
       </View>
 

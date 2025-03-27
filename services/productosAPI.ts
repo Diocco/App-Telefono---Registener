@@ -1,29 +1,43 @@
 import { ProductoI } from "../../../App Telefono - Registener/src/interfaces/producto";
 
-const url = 'https://registener-production.up.railway.app'
+const url = "https://registener-production.up.railway.app";
 
-
-
-const urlProductos = url + '/api/productos'
+const urlProductos = url + "/api/productos";
 
 // Realiza la peticion GET para obtener los productos
-export const solicitudObtenerProductos=async(tokenAcceso:string|null,desde:string='',cantidadElementos:string='',precioMin:string='',precioMax:string='',palabraBuscada:string='',categorias:string='',ordenar:string='',categoriasNombre:string='',SKUBuscado:string='',pagina:string='')=>{
+export const solicitudObtenerProductos = async (
+  tokenAcceso: string | null,
+  desde: string = "",
+  cantidadElementos: string = "",
+  precioMin: string = "",
+  precioMax: string = "",
+  palabraBuscada: string = "",
+  categorias: string = "",
+  ordenar: string = "",
+  categoriasNombre: string = "",
+  SKUBuscado: string = "",
+  pagina: string = "",
+) => {
+  const respuesta = await fetch(
+    urlProductos +
+      `?disponible=true&variantes=true&desde=${desde}&cantidadElementos=${cantidadElementos}&precioMin=${precioMin}&precioMax=${precioMax}&palabraBuscada=${palabraBuscada}&categorias=${categorias}&ordenar=${ordenar}&categoriasNombre=${categoriasNombre}&SKUBuscado=${SKUBuscado}&pagina=${pagina}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        tokenAcceso: `${tokenAcceso}`,
+      },
+    },
+  );
 
-    const respuesta = await fetch(urlProductos+`?disponible=true&variantes=true&desde=${desde}&cantidadElementos=${cantidadElementos}&precioMin=${precioMin}&precioMax=${precioMax}&palabraBuscada=${palabraBuscada}&categorias=${categorias}&ordenar=${ordenar}&categoriasNombre=${categoriasNombre}&SKUBuscado=${SKUBuscado}&pagina=${pagina}`, { 
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json'  ,
-            'tokenAcceso' : `${tokenAcceso}`  },
-    })
+  if (!respuesta.ok) {
+    // Devuelves el contenido de la respuesta, incluso si es un error
+    const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
+    return Promise.reject(errorData); // Rechazas la promesa con los datos de error
+  }
 
-    if (!respuesta.ok) {
-        // Devuelves el contenido de la respuesta, incluso si es un error
-        const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
-        return Promise.reject(errorData);  // Rechazas la promesa con los datos de error
-    }
-
-    return respuesta.json()
-}
-
+  return respuesta.json();
+};
 
 // // Carga las categorias validas en el DOM
 // export const buscarCategoriasValidas=async()=>{
@@ -36,10 +50,10 @@ export const solicitudObtenerProductos=async(tokenAcceso:string|null,desde:strin
 //     })
 //     .then(response => response.json()) // Parsear la respuesta como JSON
 //     .then(data=> { // Maneja la respuesta del servidor
-//         if(data.errors) mostrarErroresConsola (data.errors) // Si hay errores de tipeo los muestra en consola 
+//         if(data.errors) mostrarErroresConsola (data.errors) // Si hay errores de tipeo los muestra en consola
 //         else nombreCategorias = data.categorias // Si el servidor no devuelve errores guarda la respuesta
 //     })
-//     .catch(error => { // Si hay un error se manejan 
+//     .catch(error => { // Si hay un error se manejan
 //         mostrarMensaje('2',true)
 //         console.error(error);
 //     })
@@ -48,7 +62,7 @@ export const solicitudObtenerProductos=async(tokenAcceso:string|null,desde:strin
 
 // // Sube una nueva foto del producto al servidor
 // export const subirFotoProducto =async(productoID:string,imagenNueva?:File,URLImagenVieja?:string)=>{
-    
+
 //     const formData = new FormData()
 //     if(imagenNueva) formData.append('img',imagenNueva) // Si se envia una imagen para agregar, la agrega al FormData
 //     if(URLImagenVieja) formData.append('URLImagenVieja',URLImagenVieja) // Si se envia una imagen para eliminar la agrega al FormData
@@ -73,12 +87,12 @@ export const solicitudObtenerProductos=async(tokenAcceso:string|null,desde:strin
 //     .then(response => response.json()) // Parsear la respuesta como JSON
 //     .then(data=> { // Maneja la respuesta del servidor
 //         if(data.errors) {
-//             respuesta.errors = data.errors // Si hay errores de tipeo los muestra en consola 
+//             respuesta.errors = data.errors // Si hay errores de tipeo los muestra en consola
 //             mostrarErroresConsola (data.errors)
 //         }
 //         else respuesta.productoActualizado = data.productoActualizado // Si el servidor no devuelve errores guarda la respuesta
 //     })
-//     .catch(error => { // Si hay un error se manejan 
+//     .catch(error => { // Si hay un error se manejan
 //         console.error(error);
 //         mostrarMensaje('2',true);
 //     })
@@ -86,37 +100,40 @@ export const solicitudObtenerProductos=async(tokenAcceso:string|null,desde:strin
 //     return respuesta
 // }
 
-export const solicitudCrearProducto= async(datosProducto:ProductoI,tokenAcceso:string|null):Promise<ProductoI | undefined>=>{
-    
+export const solicitudCrearProducto = async (
+  datosProducto: ProductoI,
+  tokenAcceso: string | null,
+): Promise<ProductoI | undefined> => {
+  const respuesta = await fetch(urlProductos, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      tokenAcceso: `${tokenAcceso}`,
+    },
+    body: JSON.stringify(datosProducto),
+  });
+  if (!respuesta.ok) {
+    // Devuelves el contenido de la respuesta, incluso si es un error
+    const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
+    return Promise.reject(errorData); // Rechazas la promesa con los datos de error
+  }
 
-    const respuesta = await fetch(urlProductos, {
-        method: 'POST',
-        headers: { "Content-Type": "application/json",
-            'tokenAcceso':`${tokenAcceso}`},
-        body: JSON.stringify(datosProducto)
-    })
-    if (!respuesta.ok) {
-        // Devuelves el contenido de la respuesta, incluso si es un error
-        const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
-        return Promise.reject(errorData);  // Rechazas la promesa con los datos de error
-    }
-
-    return respuesta.json()
-}
+  return respuesta.json();
+};
 
 // export const obtenerProducto =async (productoId:string)=>{
 //     let producto:producto|undefined
-//     await fetch(urlProductos+`/${productoId}`, { 
+//     await fetch(urlProductos+`/${productoId}`, {
 //         method: 'GET',
 //         headers: { 'Content-Type': 'application/json' ,
 //             'tokenAcceso' : `${tokenAcceso}`  },
 //         })
-//     .then(response => response.json()) // Parsea la respuesta 
+//     .then(response => response.json()) // Parsea la respuesta
 //     .then(data=> { // Maneja la respuesta del servidor
-//         if(data.errors) mostrarErroresConsola (data.errors) // Si hay errores de tipeo los muestra en consola 
+//         if(data.errors) mostrarErroresConsola (data.errors) // Si hay errores de tipeo los muestra en consola
 //         else producto = data // Si el servidor no devuelve errores guarda la respuesta
 //     })
-//     .catch(error => { // Si hay un error se manejan 
+//     .catch(error => { // Si hay un error se manejan
 //         console.error(error);
 //         mostrarMensaje('2',true);
 //     })
@@ -124,18 +141,22 @@ export const solicitudCrearProducto= async(datosProducto:ProductoI,tokenAcceso:s
 //     return producto
 // }
 
-export const solicitudEliminarProducto =async (productoId:string,tokenAcceso:string)=>{
+export const solicitudEliminarProducto = async (
+  productoId: string,
+  tokenAcceso: string,
+) => {
+  const respuesta = await fetch(urlProductos + `/${productoId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      tokenAcceso: `${tokenAcceso}`,
+    },
+  });
+  if (!respuesta.ok) {
+    // Devuelves el contenido de la respuesta, incluso si es un error
+    const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
+    return Promise.reject(errorData); // Rechazas la promesa con los datos de error
+  }
 
-    const respuesta = await fetch(urlProductos+`/${productoId}`, { 
-        method: 'DELETE',
-        headers: {  'Content-Type': 'application/json' ,
-                    'tokenAcceso' : `${tokenAcceso}`  },
-    })
-    if (!respuesta.ok) {
-        // Devuelves el contenido de la respuesta, incluso si es un error
-        const errorData = await respuesta.json(); // Detalles del error enviados por el servidor
-        return Promise.reject(errorData);  // Rechazas la promesa con los datos de error
-    }
-
-    return 0
-}
+  return 0;
+};
