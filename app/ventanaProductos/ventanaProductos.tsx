@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { CategoriaI } from "../../interfaces/categorias";
 import { ProductoI } from "../../interfaces/producto";
 import { solicitudObtenerProductos } from "../../services/productosAPI";
-import { useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   Text,
   SectionList,
@@ -39,6 +39,7 @@ import { Stack, useRouter } from "expo-router";
 import { modificarPreferencias } from "../../redux/tokenSlice";
 import { SwitchGeneral1 } from "../../components/tsx/switches";
 import { ErrorCarga } from "@/components/tsx/errorCarga";
+import { OpcionesFlotantes } from "@/components/tsx/opcionesFlotantes";
 
 interface RespuestaProductos {
   productos: ProductoI[];
@@ -83,43 +84,6 @@ const VentanaConfiguracionProductos = ({
   );
 };
 
-const FiltrosCategorias = ({
-  categoria,
-  categoriasBuscadas,
-  alternarCategoriaBuscada,
-}: {
-  categoria: CategoriaI;
-  categoriasBuscadas: string[];
-  alternarCategoriaBuscada: Function;
-}) => {
-  let esActivo: boolean = false;
-
-  // Verifica si existen clases buscadas en este momento
-  if (categoriasBuscadas.length > 0)
-    if (categoriasBuscadas.includes(categoria.nombre)) {
-      // Verifica si la clase actual forma parte de las clases buscadas
-      esActivo = true;
-    }
-
-  return (
-    <Pressable
-      style={
-        esActivo
-          ? [
-              estilos.ventanaProductos__filtroCategoriaCategoriaActive,
-              estilos.ventanaProductos__filtroCategoriaCategoria,
-            ]
-          : estilos.ventanaProductos__filtroCategoriaCategoria
-      }
-      onPress={() => alternarCategoriaBuscada(categoria.nombre)}
-    >
-      <Text style={estilos.ventanaProductos__filtroCategoriaText}>
-        {categoria.nombre}
-      </Text>
-    </Pressable>
-  );
-};
-
 export default function VentanaProductos() {
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
@@ -130,16 +94,14 @@ export default function VentanaProductos() {
   const productos = useSelector(
     (state: RootState) => state.productos.productosFiltrados,
   ); // Obtiene los productos de la variable global
-  const categoriasBuscadas = useSelector(
-    (state: RootState) => state.productos.categoriasBuscadas,
-  ); // Obtiene los productos de la variable global
+
   const esAgruparCategoria = useSelector(
     (state: RootState) =>
       state.tokenAcceso.usuario?.preferencias.esAgruparCategoria,
   ); // Obtiene los productos de la variable global
-  const categorias = useSelector(
-    (state: RootState) => state.categorias.categorias,
-  );
+  const categorias = useSelector((state: RootState) =>
+    state.categorias.categorias.map((categoria) => categoria.nombre),
+  ); // Obtiene en un array los nombres de las categorias validas
   const router = useRouter();
 
   const [esVerConfiguracion, setEsVerConfiguracion] = useState<boolean>(false);
@@ -170,27 +132,12 @@ export default function VentanaProductos() {
       },
     },
   );
+  const [categoriasBuscadas, setCategoriaBuscadas] =
+    useState<string[]>(categorias);
 
-  const alternarCategoriaBuscada = (categoria: string) => {
-    const categoriasBuscadasActual = [...categoriasBuscadas]; // Copia el array de categorias filtradas
-    const index = categoriasBuscadasActual.findIndex(
-      (categoriaBuscada) => categoriaBuscada === categoria,
-    );
-
-    if (index === -1) {
-      // Si la categoria no existe en las categorias filtradas entonces la agrega
-      categoriasBuscadasActual.push(categoria);
-      reduxDispatch(
-        filtrarProductos({ categoriasBuscadas: categoriasBuscadasActual }),
-      );
-    } else {
-      // Si existe lo elimina
-      categoriasBuscadasActual.splice(index, 1);
-      reduxDispatch(
-        filtrarProductos({ categoriasBuscadas: categoriasBuscadasActual }),
-      );
-    }
-  };
+  useEffect(() => {
+    reduxDispatch(filtrarProductos({ categoriasBuscadas: categoriasBuscadas }));
+  }, [categoriasBuscadas]); // Cada vez que se modifica una categoria buscada lo actualiza en la variable global
 
   const Producto = ({ producto }: { producto: ProductoI }) => {
     return (
@@ -358,19 +305,11 @@ export default function VentanaProductos() {
         <View style={estilos.ventanaProductos__tablaProductos}>
           {esAgruparCategoria ? (
             <>
-              <ScrollView
-                horizontal={true}
-                style={estilos.ventanaProductos__filtroCategoria}
-              >
-                {categorias.map((categoria) => (
-                  <FiltrosCategorias
-                    key={categoria._id.toString() + "filtroCategoria"}
-                    categoria={categoria}
-                    alternarCategoriaBuscada={alternarCategoriaBuscada}
-                    categoriasBuscadas={categoriasBuscadas}
-                  />
-                ))}
-              </ScrollView>
+              <OpcionesFlotantes
+                opciones={categorias}
+                opcionesElegidas={categoriasBuscadas}
+                setOpcionesElegidas={setCategoriaBuscadas}
+              />
               <FlatList
                 data={productos}
                 keyExtractor={(producto) =>
