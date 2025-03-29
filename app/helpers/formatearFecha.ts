@@ -1,4 +1,4 @@
-export const obtenerFechaActual = (fecha?: Date) => {
+export const obtenerFechaActual = (fecha?: Date, soloFecha?: boolean) => {
   let ahora;
   if (fecha) ahora = new Date(fecha);
   else ahora = new Date();
@@ -10,5 +10,6 @@ export const obtenerFechaActual = (fecha?: Date) => {
   const horas = String(ahora.getHours()).padStart(2, "0"); // Horas con dos dígitos
   const minutos = String(ahora.getMinutes()).padStart(2, "0"); // Minutos con dos dígitos
 
-  return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+  if (!soloFecha) return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+  else return `${dia}/${mes}/${anio}`;
 };
