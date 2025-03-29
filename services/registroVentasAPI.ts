@@ -72,8 +72,8 @@ export const verRegistroVentas = async ({
   metodo = "",
   estados = "",
   buscarObservacion = "",
-  fechaDesde = "",
-  fechaHasta = "",
+  fechaDesde = undefined,
+  fechaHasta = undefined,
 }: {
   tokenAcceso: string | null;
   desde?: string;
@@ -83,8 +83,8 @@ export const verRegistroVentas = async ({
   metodo?: string;
   estados?: string;
   buscarObservacion?: string;
-  fechaDesde?: string;
-  fechaHasta?: string;
+  fechaDesde?: Date | undefined;
+  fechaHasta?: Date | undefined;
 }): Promise<{
   registroVentas: RegistroVentaI[];
   registroVentasCantidad: number;

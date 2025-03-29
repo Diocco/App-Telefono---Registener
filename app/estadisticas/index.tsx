@@ -9,7 +9,7 @@ import { verRegistroVentas } from "@/services/registroVentasAPI";
 import { Entypo, FontAwesome } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Text,
   SectionList,
@@ -29,6 +29,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { obtenerFechaActual } from "../helpers/formatearFecha";
 import { SwitchGeneral1 } from "@/components/tsx/switches";
 import SelectorFecha from "@/components/tsx/selectorFecha";
+import { OpcionesFlotantes } from "@/components/tsx/opcionesFlotantes";
+
+const estados = ["Exitoso", "Modificado", "Anulado"]; // Array con los tres estados posibles de los registros
 
 const RegistroVenta = ({ registro }: { registro: RegistroVentaI }) => {
   return (
@@ -58,44 +61,46 @@ const RegistroVenta = ({ registro }: { registro: RegistroVentaI }) => {
 };
 
 const VentanaConfiguracionProductos = ({
+  estadosSeleccionados,
+  setEstadosSeleccionados,
   setEsVerConfiguracion,
+  fechaDesde,
+  setFechaDesde,
+  fechaHasta,
+  setFechaHasta,
 }: {
+  estadosSeleccionados: string[];
+  setEstadosSeleccionados: React.Dispatch<React.SetStateAction<string[]>>;
   setEsVerConfiguracion: React.Dispatch<React.SetStateAction<boolean>>;
+  fechaDesde: Date;
+  setFechaDesde: React.Dispatch<React.SetStateAction<Date>>;
+  fechaHasta: Date;
+  setFechaHasta: React.Dispatch<React.SetStateAction<Date>>;
 }) => {
   const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario); // Obtiene los productos de la variable global
-  const dispatch = useDispatch<AppDispatch>();
-  const fechaDesde: Date = new Date(
-    new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0), // La fecha desde que se buscan registros es el inicio del dia de hace 7 dias
-  ); // La fecha de inicio se fija en el inicio del dia pero 7 dias atras del dia actual
-  const fechaHasta: Date = new Date(
-    new Date(new Date().setHours(23, 59, 59, 999)),
-  );
+
   // const alternarEsAgruparCategoria = (estado: boolean) => {
   //   if (!estado) dispatch(filtrarProductos({ categoriasBuscadas: [] }));
   //   dispatch(modificarPreferencias({ esAgruparCategoria: estado }));
   // }; // Cada vez que el switch cambia se ejecuta el cambio en el estado global
 
   return (
-    <View id="ventanaProductos__ventanaConfiguracion">
-      <View id="ventanaProductos__ventanaConfiguracion-View">
-        <SelectorFecha fecha={fechaDesde} />
-        <SelectorFecha fecha={fechaHasta} />
-        {/* <SwitchGeneral1
-          titulo="Agrupar por categorias"
-          onValueChange={alternarEsAgruparCategoria}
-          valorInicial={usuario!.preferencias.esAgruparCategoria}
-        />
-        <SwitchGeneral1
-          titulo="Agrupar por producto"
-          onValueChange={() => {}}
-          valorInicial={false}
-        />
-        <Pressable
-          style={estilosGeneral.botonGeneral1}
-          onPress={() => setEsVerConfiguracion(false)}
-        >
-          <Text style={estilosGeneral.letraBoton1}>Aceptar</Text>
-        </Pressable> */}
+    <View>
+      <Text style={estilos.tituloFiltro}>Estados: </Text>
+      <OpcionesFlotantes
+        opciones={estados}
+        opcionesElegidas={estadosSeleccionados}
+        setOpcionesElegidas={setEstadosSeleccionados}
+      />
+      <View style={estilos.ventanaConfiguracion__contenedorFechas}>
+        <View>
+          <Text style={estilos.tituloFiltro}>Desde: </Text>
+          <SelectorFecha date={fechaDesde} setDate={setFechaDesde} />
+        </View>
+        <View>
+          <Text style={estilos.tituloFiltro}>Hasta: </Text>
+          <SelectorFecha date={fechaHasta} setDate={setFechaHasta} />
+        </View>
       </View>
     </View>
   );
@@ -104,6 +109,26 @@ const VentanaConfiguracionProductos = ({
 export default function VentanaVerProductoLayout() {
   const [refreshing, setRefreshing] = useState(false);
   const [esVerConfiguracion, setEsVerConfiguracion] = useState<boolean>(false);
+  const [fechaDesde, setFechaDesde] = useState<Date>( // La fecha desde que se buscan registros es el inicio del dia de hace 7 dias
+    new Date(
+      new Date(new Date().setDate(new Date().getDate() - 7)).setHours(
+        0,
+        0,
+        0,
+        0,
+      ),
+    ),
+  );
+  const [fechaHasta, setFechaHasta] = useState<Date>( // La fecha de hasta es el final del presente dia
+    new Date(new Date(new Date().setHours(23, 59, 59, 999))),
+  );
+  const [estadosSeleccionados, setEstadosSeleccionados] =
+    useState<string[]>(estados);
+
+  useEffect(
+    () => setRefreshing(true),
+    [fechaDesde, fechaHasta, estadosSeleccionados],
+  ); // Cada vez que se cambia las fechas de filtro de debe volver a realizar el fetch
 
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
@@ -113,11 +138,17 @@ export default function VentanaVerProductoLayout() {
   ); // Obtiene los productos de la variable global
   const dispatch = useDispatch();
 
-  const { isError, isLoading } = useQuery(
+  useQuery(
     "registroVentas",
-    () => verRegistroVentas({ tokenAcceso }),
+    () =>
+      verRegistroVentas({
+        tokenAcceso,
+        fechaDesde,
+        fechaHasta,
+        estados: estadosSeleccionados.join(","),
+      }),
     {
-      enabled: registros.length < 1 || refreshing, // Condicion para realizar la solicitud
+      enabled: refreshing, // Condicion para realizar la solicitud
       onSuccess: (data) => {
         setRefreshing(false);
         dispatch(definirRegistroVentas(data.registroVentas)); // Almacena los productos como variable global
@@ -140,7 +171,7 @@ export default function VentanaVerProductoLayout() {
                   setEsVerConfiguracion(true);
                 }}
               >
-                <FontAwesome name="gear" size={24} color="white" />
+                <FontAwesome name="filter" size={30} color="white" />
               </Pressable>
             );
           },
@@ -149,16 +180,6 @@ export default function VentanaVerProductoLayout() {
         }}
       />
       <View style={{ backgroundColor: colores.fondo, flex: 1 }}>
-        {isLoading && (
-          <ActivityIndicator
-            size={"large"}
-            color={"white"}
-            style={{ flex: 1 }}
-          />
-        )}
-        {isError && (
-          <ErrorCarga mensaje="Error al cargar los productos, porfavor reinicie" />
-        )}
         <FlatList
           refreshControl={
             <RefreshControl
@@ -185,6 +206,12 @@ export default function VentanaVerProductoLayout() {
         >
           <View style={estilos.modalConfiguracion}>
             <VentanaConfiguracionProductos
+              estadosSeleccionados={estadosSeleccionados}
+              setEstadosSeleccionados={setEstadosSeleccionados}
+              fechaDesde={fechaDesde}
+              fechaHasta={fechaHasta}
+              setFechaDesde={setFechaDesde}
+              setFechaHasta={setFechaHasta}
               setEsVerConfiguracion={setEsVerConfiguracion}
             />
           </View>
@@ -259,5 +286,13 @@ const estilos = StyleSheet.create({
     padding: 20,
     backgroundColor: colores.fondo,
     zIndex: 230,
+  },
+  tituloFiltro: {
+    color: colores.letraSecundario,
+    marginTop: 15,
+  },
+  ventanaConfiguracion__contenedorFechas: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });
