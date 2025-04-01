@@ -25,5 +25,6 @@ export interface RegistroVentaI{
         usuarioNombre:string,
         modificacion:string
     }],
-    usuario:string 
+    usuario:string ,
+    productosVendidos: number,
 }

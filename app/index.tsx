@@ -16,6 +16,25 @@ import { nombreIniciales } from "./helpers/letrasIniciales";
 
 function VentanaInicial() {
   const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario);
+  const montoVentaSemanal = useSelector(
+    (state: RootState) => state.registroVentas.ingresoSemanal,
+  ); // Obtiene los registros de la variable global
+  const montoVentaSemanalAnterior = useSelector(
+    (state: RootState) => state.registroVentas.ingresoSemanalAnterior,
+  ); // Obtiene los registros de la variable global
+  const ventasCantidad = useSelector(
+    (state: RootState) => state.registroVentas.ventas,
+  ); // Obtiene los registros de la variable global
+  const ventasCantidadAnterior = useSelector(
+    (state: RootState) => state.registroVentas.ventasAnterior,
+  ); // Obtiene los registros de la variable global
+  const productosVendidos = useSelector(
+    (state: RootState) => state.registroVentas.productosVendidos,
+  );
+  const productosVendidosAnterior = useSelector(
+    (state: RootState) => state.registroVentas.productosVendidosAnterior,
+  );
+  const esMontoSemanalPositivo = montoVentaSemanal > montoVentaSemanalAnterior;
 
   const ResumenVentas = ({
     titulo,
@@ -47,7 +66,7 @@ function VentanaInicial() {
                 { color: color },
               ]}
             >
-              {`${porcentaje > 0 ? "+" : "-"}${porcentaje} %`}
+              {`${porcentaje > 0 ? "+" : "-"}${porcentaje.toFixed(2)} %`}
             </Text>
           </View>
         </View>
@@ -68,11 +87,15 @@ function VentanaInicial() {
         </Text>
       </View>
       <View style={estilos.ventanaInicial__resumen}>
-        <ResumenVentas titulo={"Ventas"} valor={55} porcentaje={-5} />
+        <ResumenVentas
+          titulo={"Ventas"}
+          valor={ventasCantidad}
+          porcentaje={(ventasCantidad / ventasCantidadAnterior - 1) * 100}
+        />
         <ResumenVentas
           titulo={"Productos vendidos"}
-          valor={55}
-          porcentaje={2}
+          valor={productosVendidos}
+          porcentaje={(productosVendidos / productosVendidosAnterior - 1) * 100}
         />
         <View
           style={[estilos.ventanaInicial__resumen__contenedor, { width: 340 }]}
@@ -80,9 +103,14 @@ function VentanaInicial() {
           <Text
             style={[estilos.ventanaInicial__resumen__valor, { marginLeft: 50 }]}
           >
-            $ 1.300.500
+            {esMontoSemanalPositivo ? "$ " : "- $ "}
+            {Math.abs(montoVentaSemanal * 1000).toLocaleString("es-AR")}
           </Text>
-          <AntDesign name={"arrowup"} size={20} color={"green"} />
+          <AntDesign
+            name={esMontoSemanalPositivo ? "arrowup" : "arrowdown"}
+            size={20}
+            color={esMontoSemanalPositivo ? "green" : "red"}
+          />
           <View
             style={[
               estilos.ventanaInicial__resumen__tituloContenedor,
@@ -97,8 +125,19 @@ function VentanaInicial() {
             >
               {"Ingresos brutos"}
             </Text>
-            <Text style={estilos.ventanaInicial__resumen__porcentaje}>
-              +2,5 %
+            <Text
+              style={[
+                esMontoSemanalPositivo
+                  ? estilos.ventanaInicial__resumen__porcentaje
+                  : estilos.ventanaInicial__resumen__porcentajeNegativo,
+              ]}
+            >
+              {esMontoSemanalPositivo ? "+" : ""}
+              {(
+                (montoVentaSemanal / montoVentaSemanalAnterior - 1) *
+                100
+              ).toFixed(2)}
+              %
             </Text>
           </View>
         </View>
@@ -210,6 +249,10 @@ const estilos = StyleSheet.create({
   },
   ventanaInicial__resumen__porcentaje: {
     color: "green",
+    marginLeft: 10,
+  },
+  ventanaInicial__resumen__porcentajeNegativo: {
+    color: "red",
     marginLeft: 10,
   },
   ventanaInicial__usuario: {

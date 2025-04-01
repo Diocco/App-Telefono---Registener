@@ -31,6 +31,17 @@ import { SwitchGeneral1 } from "@/components/tsx/switches";
 import SelectorFecha from "@/components/tsx/selectorFecha";
 import { OpcionesFlotantes } from "@/components/tsx/opcionesFlotantes";
 
+// Graficos
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart,
+} from "react-native-chart-kit";
+import { Dimensions } from "react-native";
+
 const estados = ["Exitoso", "Modificado", "Anulado"]; // Array con los tres estados posibles de los registros
 
 const RegistroVenta = ({ registro }: { registro: RegistroVentaI }) => {
@@ -124,6 +135,7 @@ export default function VentanaVerProductoLayout() {
   );
   const [estadosSeleccionados, setEstadosSeleccionados] =
     useState<string[]>(estados);
+  const [esSemanaAnterior, setEsSemanaAnterior] = useState(false);
 
   useEffect(
     () => setRefreshing(true),
@@ -132,10 +144,17 @@ export default function VentanaVerProductoLayout() {
 
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
-  ); // Obtiene los productos de la variable global
+  ); // Obtiene el token de acceso de la variable global
   const registros = useSelector(
     (state: RootState) => state.registroVentas.registros,
-  ); // Obtiene los productos de la variable global
+  ); // Obtiene los registros de la variable global
+  const ventasProductosSemanales = useSelector(
+    (state: RootState) => state.registroVentas.montoVentasPorDia,
+  ); // Obtiene los registros de montos de venta semanal de la variable global
+  const ventasProductosSemanalesAnterior = useSelector(
+    (state: RootState) => state.registroVentas.montoVentasPorDiaAnterior,
+  ); // Obtiene los registros de montos de venta semanal de la variable global
+
   const dispatch = useDispatch();
 
   useQuery(
@@ -163,37 +182,115 @@ export default function VentanaVerProductoLayout() {
           headerLeft: () => {
             return <></>;
           },
-          headerRight: () => {
-            return (
-              <Pressable
-                style={estilosGeneral.encabezado__boton}
-                onPress={() => {
-                  setEsVerConfiguracion(true);
-                }}
-              >
-                <FontAwesome name="filter" size={30} color="white" />
-              </Pressable>
-            );
-          },
           headerTitleAlign: "center",
           headerTitle: "Estadisticas",
         }}
       />
-      <View style={{ backgroundColor: colores.fondo, flex: 1 }}>
-        <FlatList
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => setRefreshing(true)}
-            />
-          }
-          data={registros}
-          keyExtractor={(registro) =>
-            registro!._id.toString() + new Date().getTime.toString()
-          }
-          renderItem={(registro) => <RegistroVenta registro={registro.item} />}
-        />
-      </View>
+      <ScrollView style={estilos.contenedorSeccion}>
+        <View style={estilos.seccion}>
+          <View style={estilos.contenedorTitulo}>
+            <Text style={estilosGeneral.titulo}>Registros</Text>
+            <Pressable
+              style={estilosGeneral.botonGeneral3}
+              onPress={() => {
+                setEsVerConfiguracion(true);
+              }}
+            >
+              <FontAwesome name="filter" size={24} color="white" />
+            </Pressable>
+          </View>
+          <FlatList
+            scrollEnabled={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => setRefreshing(true)}
+              />
+            }
+            data={registros}
+            keyExtractor={(registro) =>
+              registro!._id.toString() + new Date().getTime.toString()
+            }
+            renderItem={(registro) => (
+              <RegistroVenta registro={registro.item} />
+            )}
+          />
+        </View>
+        <View style={estilos.seccion}>
+          <View style={estilos.contenedorTitulo}>
+            <Text style={estilosGeneral.titulo}>Ventas semanales</Text>
+            <Pressable
+              style={[
+                estilosGeneral.botonGeneral3,
+                [
+                  !esSemanaAnterior && {
+                    backgroundColor: colores.fondoOscurecido,
+                  },
+                ],
+              ]}
+              onPress={() => {
+                setEsSemanaAnterior(true);
+              }}
+              disabled={esSemanaAnterior}
+            >
+              <Entypo name="chevron-left" size={24} color="white" />
+            </Pressable>
+            <Pressable
+              style={[
+                estilosGeneral.botonGeneral3,
+                [
+                  esSemanaAnterior && {
+                    backgroundColor: colores.fondoOscurecido,
+                  },
+                ],
+              ]}
+              onPress={() => {
+                setEsSemanaAnterior(false);
+              }}
+              disabled={!esSemanaAnterior}
+            >
+              <Entypo name="chevron-right" size={24} color="white" />
+            </Pressable>
+          </View>
+          <LineChart
+            data={{
+              labels: ["D", "L", "M", "M", "J", "V", "S"],
+              datasets: [
+                {
+                  data: esSemanaAnterior
+                    ? [...ventasProductosSemanalesAnterior]
+                    : [...ventasProductosSemanales],
+                },
+              ],
+            }}
+            width={Dimensions.get("window").width - 30}
+            height={220}
+            yAxisSuffix="k"
+            yAxisInterval={2} // optional, defaults to 1
+            chartConfig={{
+              backgroundColor: colores.fondoElemento,
+              backgroundGradientFrom: colores.fondoElemento,
+              backgroundGradientTo: colores.fondoElemento,
+              decimalPlaces: 1, // optional, defaults to 2dp
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: "7",
+                strokeWidth: "5",
+                stroke: colores.boton,
+              },
+            }}
+            bezier
+            style={{
+              marginVertical: 8,
+              borderRadius: 16,
+            }}
+          />
+        </View>
+      </ScrollView>
       <Modal
         visible={esVerConfiguracion}
         animationType="fade"
@@ -294,5 +391,22 @@ const estilos = StyleSheet.create({
   ventanaConfiguracion__contenedorFechas: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  contenedorSeccion: {
+    backgroundColor: colores.fondo,
+    flex: 1,
+    padding: 10,
+  },
+  seccion: {
+    height: 300,
+    padding: 5,
+    borderRadius: 10,
+    backgroundColor: colores.input,
+    marginBottom: 10,
+  },
+  contenedorTitulo: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

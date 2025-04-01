@@ -33,6 +33,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { solicitudUsuarioVerificado } from "@/services/usuariosAPI";
 import { definirUsuario, eliminarTokenAcceso } from "@/redux/tokenSlice";
 import { mostrarMensaje } from "@/redux/mensajeEmergenteSlice";
+import { verRegistroVentas } from "@/services/registroVentasAPI";
+import { definirRegistroVentas } from "@/redux/registroVentasSlice";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -60,20 +62,44 @@ function LayoutContent() {
 
   useEffect(() => {
     if (!tokenAcceso) {
-      // Si no existe el token entonces manda al usuario al inicio de sesion
+      // Si no existe el token, elimina el token guardado y muestra el mensaje
+      dispatch(eliminarTokenAcceso());
+      dispatch(
+        mostrarMensaje({ mensaje: "Sesión ha caducado", esError: true }),
+      );
       return;
     }
-    // Si existe un token entonces lo verifica
-    solicitudUsuarioVerificado(tokenAcceso) // Verifica el usuario en la base de datos
+
+    // Realizar ambas solicitudes en paralelo
+    solicitudUsuarioVerificado(tokenAcceso)
       .then((data) => {
-        dispatch(definirUsuario(data.usuarioVerificado)); // Define el usuario en la variable global
+        dispatch(definirUsuario(data.usuarioVerificado)); // Actualiza el usuario
       })
       .catch(() => {
         dispatch(eliminarTokenAcceso());
         dispatch(
-          mostrarMensaje({ mensaje: "Sesion ha caducado", esError: true }),
-        ); // Si el token no es valido reedirije al usuario al inicio de sesion
+          mostrarMensaje({ mensaje: "Sesión ha caducado", esError: true }),
+        );
       });
+    verRegistroVentas({
+      tokenAcceso,
+      fechaDesde: new Date(
+        new Date(new Date().setDate(new Date().getDate() - 7)).setHours(
+          0,
+          0,
+          0,
+          0,
+        ),
+      ),
+      fechaHasta: new Date(new Date(new Date().setHours(23, 59, 59, 999))),
+    })
+      .then((data) => {
+        dispatch(definirRegistroVentas(data.registroVentas)); // Actualiza el registro de ventas
+      })
+      .catch((error) => {
+        console.error("Error al obtener registros de ventas:", error);
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenAcceso]);
 

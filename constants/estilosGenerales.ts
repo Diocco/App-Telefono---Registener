@@ -37,6 +37,15 @@ export const estilosGeneral = StyleSheet.create({
     fontSize: 20,
     color: colores.boton,
   },
+  botonGeneral3: {
+    width: 40,
+    height: 40,
+    margin: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 100000,
+    backgroundColor: colores.fondoElemento,
+  },
   encabezado: {
     height: 110,
     backgroundColor: colores.boton,
@@ -53,5 +62,10 @@ export const estilosGeneral = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colores.fondoOscurecido,
+  },
+  titulo: {
+    color: colores.letra,
+    fontSize: 30,
+    padding: 10,
   },
 });
