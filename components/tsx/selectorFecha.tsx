@@ -3,7 +3,7 @@ import { View, Platform, Pressable, Text } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { estilosGeneral } from "@/constants/estilosGenerales";
 import { Fontisto } from "@expo/vector-icons";
-import { obtenerFechaActual } from "@/app/helpers/formatearFecha";
+import { obtenerFechaActual } from "@/helpers/formatearFecha";
 
 export const SelectorFecha = ({
   date,

@@ -22,7 +22,7 @@ import {
   FlatList,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { nombreIniciales } from "../helpers/letrasIniciales";
+import { nombreIniciales } from "../../helpers/letrasIniciales";
 import { InputRegistro } from "@/components/tsx/inputRegistro";
 import {
   FieldValues,
@@ -42,7 +42,7 @@ import {
   ErrorOption,
   useForm,
 } from "react-hook-form";
-import { seleccionarImagen } from "../helpers/seleccionarImagen";
+import { seleccionarImagen } from "../../helpers/seleccionarImagen";
 
 // const Opcion = ({
 //   titulo,

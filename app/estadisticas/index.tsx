@@ -26,7 +26,7 @@ import {
 } from "react-native";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { obtenerFechaActual } from "../helpers/formatearFecha";
+import { obtenerFechaActual } from "../../helpers/formatearFecha";
 import { SwitchGeneral1 } from "@/components/tsx/switches";
 
 // Graficos

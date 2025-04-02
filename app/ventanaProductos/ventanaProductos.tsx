@@ -23,8 +23,8 @@ import { definirCategorias } from "../../redux/categoriasSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 // import { VentanaVerProducto } from "./ventanaVerProducto";
-import { ordenarProductos } from "../helpers/ordenarProductos";
-import { obtenerSourceImagen } from "../helpers/obtenerSourceImagen";
+import { ordenarProductos } from "../../helpers/ordenarProductos";
+import { obtenerSourceImagen } from "../../helpers/obtenerSourceImagen";
 
 // Iconos
 import Entypo from "@expo/vector-icons/Entypo";

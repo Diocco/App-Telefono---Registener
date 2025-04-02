@@ -18,7 +18,7 @@ import {
   actualizarProducto,
   eliminarProductoRedux,
 } from "../../redux/productosSlice";
-import { obtenerFormatoImagen } from "../helpers/obtenerFormatoImagen";
+import { obtenerFormatoImagen } from "../../helpers/obtenerFormatoImagen";
 import {
   solicitudCrearProducto,
   solicitudEliminarProducto,
@@ -31,9 +31,9 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { estilosGeneral } from "../../constants/estilosGenerales";
 import Entypo from "@expo/vector-icons/Entypo";
 import SelectorRegistro from "../../components/tsx/selectorRegistro";
-import { obtenerSourceImagen } from "../helpers/obtenerSourceImagen";
+import { obtenerSourceImagen } from "../../helpers/obtenerSourceImagen";
 import { VentanaEmergente } from "../../components/tsx/ventanaEmergente";
-import { seleccionarImagen } from "../helpers/seleccionarImagen";
+import { seleccionarImagen } from "../../helpers/seleccionarImagen";
 import { produce } from "immer";
 
 const VentanaImagen = ({

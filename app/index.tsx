@@ -12,7 +12,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 // Variables
 import { colores } from "../constants/colores";
-import { nombreIniciales } from "./helpers/letrasIniciales";
+import { nombreIniciales } from "../helpers/letrasIniciales";
 
 function VentanaInicial() {
   const usuario = useSelector((state: RootState) => state.tokenAcceso.usuario);

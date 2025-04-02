@@ -28,9 +28,37 @@ import { OpcionesFlotantes } from "@/components/tsx/opcionesFlotantes";
 import { RegistroVenta } from ".";
 import { useQuery } from "react-query";
 import { verRegistroVentas } from "@/services/registroVentasAPI";
-import { definirRegistroVentas } from "@/redux/registroVentasSlice";
+import { definirRegistroVentas } from "../../redux/registroVentasSlice";
+import { RegistroVentaI } from "@/interfaces/registroVentas";
 
 const estados = ["Exitoso", "Modificado", "Anulado"]; // Array con los tres estados posibles de los registros
+
+const filtrarRegistros = ({
+  fechaDesde,
+  fechaHasta,
+  estadosSeleccionados,
+  registros,
+}: {
+  fechaDesde: Date;
+  fechaHasta: Date;
+  estadosSeleccionados: string[];
+  registros: RegistroVentaI[];
+}) => {
+  // Realiza la nueva busqueda
+  let registrosFiltrados: RegistroVentaI[] = [];
+
+  registros.forEach((registro) => {
+    const fecha = new Date(registro.fechaVenta);
+
+    // Verifica las fechas y el estado del registro, si cumple con los filtros se lo agrega a los registros filtrados
+    if (!(fecha > fechaDesde && fecha < fechaHasta)) return; // Verifica que este entre las fechas de filtro
+    if (!estadosSeleccionados.includes(registro.estado)) return; // Verifica que el estado del registro pertenezca a los estados buscados
+
+    registrosFiltrados.push(registro); // El registro paso los filtros por lo que es agregado a los registros filtrados
+  });
+
+  return registrosFiltrados;
+};
 
 const VentanaConfiguracionProductos = ({
   estadosSeleccionados,
@@ -99,6 +127,12 @@ export default function VentanaVerProductoLayout() {
   const registros = useSelector(
     (state: RootState) => state.registroVentas.registros,
   ); // Obtiene los registros de la variable global
+  let registrosFiltrados = filtrarRegistros({
+    fechaDesde,
+    fechaHasta,
+    estadosSeleccionados,
+    registros,
+  });
   const tokenAcceso = useSelector(
     (state: RootState) => state.tokenAcceso.tokenAcceso,
   ); // Obtiene el token de acceso de la variable global
@@ -107,10 +141,6 @@ export default function VentanaVerProductoLayout() {
 
   const dispatch = useDispatch();
 
-  useEffect(
-    () => setRefreshing(true),
-    [fechaDesde, fechaHasta, estadosSeleccionados],
-  ); // Cada vez que se cambia las fechas de filtro de debe volver a realizar el fetch
   useQuery(
     "registroVentas",
     () =>
@@ -166,7 +196,7 @@ export default function VentanaVerProductoLayout() {
             onRefresh={() => setRefreshing(true)}
           />
         }
-        data={registros}
+        data={registrosFiltrados}
         keyExtractor={(registro) =>
           registro!._id.toString() + new Date().getTime.toString()
         }
