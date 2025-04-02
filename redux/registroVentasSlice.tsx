@@ -85,7 +85,6 @@ const calcularEstadisticas = (registros: RegistroVentaI[]) => {
     // Variables del registro
     const fecha = new Date(registro.fechaVenta); // Fecha de la venta
     const diaSemana = fecha.getDay(); // Dia de la semana de la venta
-
     // Suma los montos de la venta al dia de la semana correspondiente de esta semana o la anterior
     if (esFechaDeEstaSemana(fecha)) {
       resultados.montoVentasPorDia[diaSemana] += registro.total / 1000;
@@ -97,6 +96,7 @@ const calcularEstadisticas = (registros: RegistroVentaI[]) => {
       resultados.productosVendidosAnterior += registro.productosVendidos; // Suma la cantidad de productos vendidos en el carrito
     }
   });
+
   return resultados;
 };
 
@@ -114,6 +114,8 @@ const registroVentasSlice = createSlice({
       state.montoVentasPorDiaAnterior = resultados.montoVentasPorDiaAnterior;
       state.ventas = resultados.ventas;
       state.ventasAnterior = resultados.ventasAnterior;
+      state.productosVendidos = resultados.productosVendidos;
+      state.productosVendidosAnterior = resultados.productosVendidosAnterior;
       state.ingresoSemanal = resultados.montoVentasPorDia.reduce(
         (acumulado, actual) => acumulado + actual, // Suma los montos de todos los dias de la semana
       );

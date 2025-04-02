@@ -34,28 +34,47 @@ function VentanaInicial() {
   const productosVendidosAnterior = useSelector(
     (state: RootState) => state.registroVentas.productosVendidosAnterior,
   );
-  const esMontoSemanalPositivo = montoVentaSemanal > montoVentaSemanalAnterior;
 
   const ResumenVentas = ({
     titulo,
     valor,
     porcentaje,
+    esMonto = false,
   }: {
     titulo: string;
     valor: number;
     porcentaje: number;
+    esMonto?: boolean;
   }) => {
     const color = porcentaje > 0 ? "#007a00" : "red";
-
     return (
       <>
-        <View style={estilos.ventanaInicial__resumen__contenedor}>
-          <Text style={estilos.ventanaInicial__resumen__valor}>{valor}</Text>
-          <AntDesign
-            name={porcentaje > 0 ? "arrowup" : "arrowdown"}
-            size={20}
-            color={color}
-          />
+        <View
+          style={[
+            estilos.ventanaInicial__resumen__contenedor,
+            [esMonto && { width: 340 }],
+          ]}
+        >
+          <View style={estilos.ventanaInicial__resumen__tituloContenedor}>
+            {esMonto ? (
+              <Text style={estilos.ventanaInicial__resumen__valor}>
+                {montoVentaSemanal > 0 ? "$ " : "- $ "}
+                {Math.abs(montoVentaSemanal * 1000).toLocaleString("es-AR")}
+              </Text>
+            ) : (
+              <Text style={estilos.ventanaInicial__resumen__valor}>
+                {valor}
+              </Text>
+            )}
+
+            {isFinite(porcentaje) && (
+              <AntDesign
+                name={porcentaje > 0 ? "arrowup" : "arrowdown"}
+                size={20}
+                color={color}
+              />
+            )}
+          </View>
           <View style={estilos.ventanaInicial__resumen__tituloContenedor}>
             <Text style={estilos.ventanaInicial__resumen__titulo}>
               {titulo}
@@ -66,7 +85,8 @@ function VentanaInicial() {
                 { color: color },
               ]}
             >
-              {`${porcentaje > 0 ? "+" : "-"}${porcentaje.toFixed(2)} %`}
+              {isFinite(porcentaje) &&
+                `${porcentaje > 0 ? "+" : "-"}${porcentaje.toFixed(1)} %`}
             </Text>
           </View>
         </View>
@@ -97,50 +117,12 @@ function VentanaInicial() {
           valor={productosVendidos}
           porcentaje={(productosVendidos / productosVendidosAnterior - 1) * 100}
         />
-        <View
-          style={[estilos.ventanaInicial__resumen__contenedor, { width: 340 }]}
-        >
-          <Text
-            style={[estilos.ventanaInicial__resumen__valor, { marginLeft: 50 }]}
-          >
-            {esMontoSemanalPositivo ? "$ " : "- $ "}
-            {Math.abs(montoVentaSemanal * 1000).toLocaleString("es-AR")}
-          </Text>
-          <AntDesign
-            name={esMontoSemanalPositivo ? "arrowup" : "arrowdown"}
-            size={20}
-            color={esMontoSemanalPositivo ? "green" : "red"}
-          />
-          <View
-            style={[
-              estilos.ventanaInicial__resumen__tituloContenedor,
-              { width: 340, alignItems: "center" },
-            ]}
-          >
-            <Text
-              style={[
-                estilos.ventanaInicial__resumen__titulo,
-                { width: "auto" },
-              ]}
-            >
-              {"Ingresos brutos"}
-            </Text>
-            <Text
-              style={[
-                esMontoSemanalPositivo
-                  ? estilos.ventanaInicial__resumen__porcentaje
-                  : estilos.ventanaInicial__resumen__porcentajeNegativo,
-              ]}
-            >
-              {esMontoSemanalPositivo ? "+" : ""}
-              {(
-                (montoVentaSemanal / montoVentaSemanalAnterior - 1) *
-                100
-              ).toFixed(2)}
-              %
-            </Text>
-          </View>
-        </View>
+        <ResumenVentas
+          titulo={"Ingresos brutos"}
+          valor={Math.abs(montoVentaSemanal * 1000)}
+          porcentaje={(montoVentaSemanal / montoVentaSemanalAnterior - 1) * 100}
+          esMonto={true}
+        />
       </View>
     </View>
   );
@@ -225,22 +207,20 @@ const estilos = StyleSheet.create({
     borderRadius: 10,
   },
   ventanaInicial__resumen__tituloContenedor: {
-    width: 130,
+    flexBasis: "100%",
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    height: 30,
+    justifyContent: "center",
   },
   ventanaInicial__resumen__titulo: {
+    maxWidth: 100,
     textAlign: "center",
     color: colores.letraSecundario,
     fontSize: 12,
-    width: 70,
   },
   ventanaInicial__resumen__valor: {
     color: colores.letra,
     fontSize: 35,
-    marginLeft: 40,
     marginRight: 10,
   },
   ventanaInicial__resumen__flecha: {

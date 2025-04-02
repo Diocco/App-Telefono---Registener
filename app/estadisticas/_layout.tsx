@@ -8,6 +8,10 @@ export default function VentanaVerProductoLayout() {
         name="index"
         options={{ headerStyle: { backgroundColor: colores.boton } }}
       />
+      <Stack.Screen
+        name="registros"
+        options={{ headerStyle: { backgroundColor: colores.boton } }}
+      />
     </Stack>
   );
 }

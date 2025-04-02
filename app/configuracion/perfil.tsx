@@ -44,32 +44,32 @@ import {
 } from "react-hook-form";
 import { seleccionarImagen } from "../helpers/seleccionarImagen";
 
-const Opcion = ({
-  titulo,
-  onPress,
-}: {
-  titulo: string;
-  onPress?: Function;
-}) => {
-  const esHabilitado: boolean = onPress ? true : false;
-  if (!esHabilitado) onPress = () => {};
+// const Opcion = ({
+//   titulo,
+//   onPress,
+// }: {
+//   titulo: string;
+//   onPress?: Function;
+// }) => {
+//   const esHabilitado: boolean = onPress ? true : false;
+//   if (!esHabilitado) onPress = () => {};
 
-  return (
-    <>
-      <Pressable style={estilos.opcion} onPress={() => onPress!()}>
-        <Text
-          style={[
-            estilos.textoOpcion,
-            !esHabilitado && { color: "gray" }, // Si es false, agrega el color gris
-          ]}
-        >
-          {titulo}
-        </Text>
-        <Entypo name="chevron-right" size={30} color="gray" />
-      </Pressable>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <Pressable style={estilos.opcion} onPress={() => onPress!()}>
+//         <Text
+//           style={[
+//             estilos.textoOpcion,
+//             !esHabilitado && { color: "gray" }, // Si es false, agrega el color gris
+//           ]}
+//         >
+//           {titulo}
+//         </Text>
+//         <Entypo name="chevron-right" size={30} color="gray" />
+//       </Pressable>
+//     </>
+//   );
+// };
 
 export default function VentanaVerProductoLayout() {
   const [imagen, setImagen] = useState("");
